@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+
 class InfoMessage():
     """Информационное сообщение о тренировке."""
 
@@ -6,8 +10,7 @@ class InfoMessage():
                  duration,
                  distance: float,
                  speed: float,
-                 calories: float
-                 ) -> None:
+                 calories: float) -> None:
         self.training_type = training_type
         self.duration = duration
         self.distance = distance
@@ -25,6 +28,10 @@ class InfoMessage():
 class Training:
     """Базовый класс тренировки."""
 
+    LEN_STEP = 0.65  # Const for convert steps
+    M_IN_KM = 1000  # Const for convert meters in kilometers
+    H_IN_M = 60  # Const for convert hours in minutes
+
     def __init__(self,
                  action: int,
                  duration: float,
@@ -33,13 +40,10 @@ class Training:
         self.action = action
         self.duration = duration
         self.weight = weight
-    LEN_STEP = 0.65
-    M_IN_KM = 1000
-    CH_IN_M = 60
 
-    def get_distance(self, LEN_STEP=0.65) -> float:
+    def get_distance(self) -> float:
         """Получить дистанцию в км."""
-        return self.action * LEN_STEP / self.M_IN_KM
+        return self.action * self.LEN_STEP / self.M_IN_KM
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
@@ -51,20 +55,20 @@ class Training:
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-        return InfoMessage(Training.__name__, self.duration,
-                           self.get_distance(), self.get_mean_speed(),
-                           self.get_spent_calories)
+        a = InfoMessage(Training.__name__, self.duration,
+                        self.get_distance(), self.get_mean_speed(),
+                        self.get_spent_calories)
+        return a.get_message()
 
 
 class Running(Training):
     """Тренировка: бег."""
 
-    CALORIES_MEAN_SPEED_MULTIPLIER = 18
-    CALORIES_MEAN_SPEED_SHIFT = 1.79
-    name = 'Бег'
+    CALORIES_MEAN_SPEED_MULTIPLIER = 18  # Const for convert calories
+    CALORIES_MEAN_SPEED_SHIFT = 1.79  # Const for convert calories
 
     def get_distance(self):
-        return super().get_distance(LEN_STEP=0.65)
+        return super().get_distance()
 
     def get_mean_speed(self):
         return super().get_mean_speed()
@@ -72,71 +76,78 @@ class Running(Training):
     def get_spent_calories(self):
         return ((self.CALORIES_MEAN_SPEED_MULTIPLIER * self.get_mean_speed()
                 + self.CALORIES_MEAN_SPEED_SHIFT) * self.weight / self.M_IN_KM
-                * self.duration * self.CH_IN_M)
+                * self.duration * self.H_IN_M)
 
     def show_training_info(self):
-        return (InfoMessage(Running.__name__, self.duration,
-                            self.get_distance(), self.get_mean_speed(),
-                            self.get_spent_calories()))
+        return super().show_training_info()
+        #return (InfoMessage(Running.__name__, self.duration,
+         #                   self.get_distance(), self.get_mean_speed(),
+          #                  self.get_spent_calories()))
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
 
+    CALORIES_MULTIPLIER = 0.035  # Const for get calories
+    CALORIES_SHIFT = 0.029  # Const for get calories
+    KMH_IN_MIM = 0.278  # Const for convert kmh in mpm
+    SM_IN_M = 100  # Const for cobvert sm in m
+
     def __init__(self, action, duration, weight, height):
         super().__init__(action, duration, weight)
         self.height = height
-    KOEF_1 = 0.035
-    KOEF_2 = 0.029
-    KMH_IN_MIM = 0.278
-    SM_IN_M = 100
 
     def get_distance(self):
-        return super().get_distance(LEN_STEP=0.65)
+        return super().get_distance()
 
     def get_mean_speed(self):
         return super().get_mean_speed()
 
     def get_spent_calories(self):
-        return ((self.KOEF_1 * self.weight + (((self.get_mean_speed()
-                 * self.KMH_IN_MIM)**2) / (self.height / self.SM_IN_M))
-                 * self.KOEF_2 * self.weight) * self.duration * self.CH_IN_M)
+        return ((self.CALORIES_MULTIPLIER * self.weight
+                + (((self.get_mean_speed() * self.KMH_IN_MIM)**2)
+                   / (self.height / self.SM_IN_M)) * self.CALORIES_SHIFT
+                * self.weight) * self.duration * self.H_IN_M)
 
     def show_training_info(self):
-        return InfoMessage(SportsWalking.__name__, self.duration,
-                           self.get_distance(), self.get_mean_speed(),
-                           self.get_spent_calories())
+        return super().show_training_info()
+        #return InfoMessage(SportsWalking.__name__, self.duration,
+         #                  self.get_distance(), self.get_mean_speed(),
+          #                 self.get_spent_calories())
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
+
+    CALORIES_MULTIPLIER = 1.1  # Const for get calories
+    CALORIES_SHIFT = 2  # Const for get calories
+    LEN_STEP = 1.38  # Const for convert steps
+
     def __init__(self, action, duration, weight, length_pool, count_pool):
         super().__init__(action, duration, weight)
         self.length_pool = length_pool
         self.count_pool = count_pool
-    KONST1 = 1.1
-    KONST2 = 2  # Пришлось дописать везде константы из-за pytest
-    LEN_STEP = 1.38  # Зачем так делать, если проще сделать, как у меня
 
     def get_distance(self):
-        return super().get_distance(LEN_STEP=1.38)  # Тут указывается константа
+        return super().get_distance()
 
     def get_mean_speed(self):
         return (self.length_pool * self.count_pool / self.M_IN_KM
                 / self.duration)
 
     def get_spent_calories(self):
-        return ((self.get_mean_speed() + self.KONST1) * self.KONST2
-                * self.weight * self.duration)
+        return ((self.get_mean_speed() + self.CALORIES_MULTIPLIER)
+                * self.CALORIES_SHIFT * self.weight * self.duration)
 
     def show_training_info(self):
-        return InfoMessage(Swimming.__name__, self.duration,
-                           self.get_distance(), self.get_mean_speed(),
-                           self.get_spent_calories())
+        return super().show_training_info()
+        #return InfoMessage(Swimming.__name__, self.duration,
+         #                  self.get_distance(), self.get_mean_speed(),
+          #                 self.get_spent_calories())
 
 
-def read_package(workout_type: str, data: list) -> Training:  # Реализовать
-    """Прочитать данные полученные от датчиков."""            # через словарь?
+def read_package(workout_type: str, data: list) -> Training:
+    """Прочитать данные полученные от датчиков."""
     if workout_type == 'SWM':
         action, duration, weight, length_pool, count_pool = data
         return Swimming(action, duration, weight, length_pool, count_pool)
@@ -151,7 +162,7 @@ def read_package(workout_type: str, data: list) -> Training:  # Реализов
 def main(training: Training) -> None:
     """Главная функция."""
     info = training.show_training_info()
-    print(info.get_message())
+    print(info)  # .get_message()
     return
 
 
