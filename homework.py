@@ -62,7 +62,7 @@ class Running(Training):
     def get_spent_calories(self):
         return ((self.CALORIES_MEAN_SPEED_MULTIPLIER * self.get_mean_speed()
                  + self.CALORIES_MEAN_SPEED_SHIFT) * self.weight / self.M_IN_KM
-                 * self.duration * self.MIN_IN_H)
+                * self.duration * self.MIN_IN_H)
 
 
 class SportsWalking(Training):
@@ -84,7 +84,7 @@ class SportsWalking(Training):
     def get_spent_calories(self):
         return ((self.CALORIES_MULTIPLIER * self.weight
                  + (((self.get_mean_speed() * self.KMH_IN_MIM)**2)
-                 / (self.height / self.CM_IN_M)) * self.CALORIES_SHIFT
+                    / (self.height / self.CM_IN_M)) * self.CALORIES_SHIFT
                  * self.weight) * self.duration * self.MIN_IN_H)
 
 
@@ -111,7 +111,7 @@ class Swimming(Training):
 
     def get_spent_calories(self):
         return ((self.get_mean_speed() + self.CALORIES_MULTIPLIER)
-                 * self.CALORIES_SHIFT * self.weight * self.duration)
+                * self.CALORIES_SHIFT * self.weight * self.duration)
 
 
 classes_value = {'SWM': Swimming,
