@@ -56,7 +56,7 @@ class Training:
 class Running(Training):
     """Тренировка: бег."""
 
-    CALORIES_MEAN_SPEED_MULTIPLIER: int = 18  # Const for convert calories
+    CALORIES_MEAN_SPEED_MULTIPLIER: float = 18  # Const for convert calories
     CALORIES_MEAN_SPEED_SHIFT: float = 1.79  # Const for convert calories
 
     def get_spent_calories(self):
@@ -92,7 +92,7 @@ class Swimming(Training):
     """Тренировка: плавание."""
 
     CALORIES_MULTIPLIER: float = 1.1  # Const for get calories
-    CALORIES_SHIFT: int = 2  # Const for get calories
+    CALORIES_SHIFT: float = 2  # Const for get calories
     LEN_STEP: float = 1.38  # Const for convert steps
 
     def __init__(self,
@@ -114,15 +114,15 @@ class Swimming(Training):
                 * self.CALORIES_SHIFT * self.weight * self.duration)
 
 
-classes_value = {'SWM': Swimming,
-                 'RUN': Running,
-                 'WLK': SportsWalking}
+classes_value: dict[str, Training] = {'SWM': Swimming,
+                                      'RUN': Running,
+                                      'WLK': SportsWalking}
 
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
     if workout_type not in classes_value:
-        raise (NotImplementedError('Получены неверные данные!'))
+        raise NotImplementedError('Получены неверные данные!')
     return classes_value[workout_type](*data)
 
 
@@ -141,7 +141,5 @@ if __name__ == '__main__':
         for workout_type, data in packages:
             training = read_package(workout_type, data)
             main(training)
-    except ValueError:
-        print('Ошибка, получены неверные данные!')
-    except NotImplementedError:
+    except ValueError or NotImplementedError:
         print('Ошибка, получены неверные данные!')
