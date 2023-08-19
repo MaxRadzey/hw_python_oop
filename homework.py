@@ -114,16 +114,16 @@ class Swimming(Training):
                 * self.CALORIES_SHIFT * self.weight * self.duration)
 
 
-classes_value: dict[str, Training] = {'SWM': Swimming,
+classes: dict[str, type[Training]] = {'SWM': Swimming,
                                       'RUN': Running,
                                       'WLK': SportsWalking}
 
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    if workout_type not in classes_value:
+    if workout_type not in classes:
         raise NotImplementedError('Получены неверные данные!')
-    return classes_value[workout_type](*data)
+    return classes[workout_type](*data)
 
 
 def main(training: Training) -> None:
@@ -141,5 +141,5 @@ if __name__ == '__main__':
         for workout_type, data in packages:
             training = read_package(workout_type, data)
             main(training)
-    except ValueError or NotImplementedError:
+    except (ValueError, NotImplementedError):
         print('Ошибка, получены неверные данные!')
